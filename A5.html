@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程费用计算器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7f9;
+        }
+        .company-title {
+            color: #1e3a8a;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .app-title {
+            color: #1e3a8a;
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            font-size: 2.2rem;
+        }
+        .input-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .export-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .export-buttons button {
+            background-color: #27ae60;
+            margin-top: 0;
+        }
+        .export-buttons button:nth-child(2) {
+            background-color: #2980b9;
+        }
+        .export-buttons button:nth-child(3) {
+            background-color: #8e44ad;
+        }
+        .results-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+        .results-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        .results-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .results-table tr:hover {
+            background-color: #f1f7fd;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .summary-row {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+        }
+        .highlight-row {
+            background-color: #ffecb3 !important;
+        }
+        .explanation {
+            margin-top: 25px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        .explanation h2 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+        .warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .highlight {
+            background-color: #ffecb3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="company-title">广州城市更新投资发展有限公司</h1>
+    <h1 class="app-title">工程费用计算器</h1>
+    
+    <div class="input-section">
+        <h2>输入参数</h2>
+        <div class="input-grid">
+            <div class="input-group">
+                <label for="aboveArea">地上建筑面积 (m²)</label>
+                <input type="number" id="aboveArea" min="0" step="1000" placeholder="例如：50000" value="50000">
+            </div>
+            <div class="input-group">
+                <label for="belowArea">地下建筑面积 (m²)</label>
+                <input type="number" id="belowArea" min="0" step="1000" placeholder="例如：60000" value="60000">
+            </div>
+            <div class="input-group">
+                <label for="aboveRate">地上单方指标 (元/m²)</label>
+                <input type="number" id="aboveRate" min="0" step="100" placeholder="例如：4500" value="4500">
+            </div>
+            <div class="input-group">
+                <label for="belowRate">地下单方指标 (元/m²)</label>
+                <input type="number" id="belowRate" min="0" step="100" placeholder="例如：6500" value="6500">
+            </div>
+        </div>
+        <button onclick="calculateAll()">计算所有费用</button>
+        <div class="export-buttons">
+            <button onclick="exportPDF()">导出PDF</button>
+            <button onclick="exportWord()">导出Word</button>
+            <button onclick="exportExcel()">导出Excel</button>
+        </div>
+        <div class="warning">
+            <strong>注意:</strong> 
+            <ol>
+                <li>BIM配合费 = (地上建筑面积 + 地下建筑面积) × 11.24元/m²</li>
+                <li><span class="highlight">初设40%+勘察+BIM40% = 设计费×40% + BIM配合费×40% + 建安费合计×1%</span></li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <h2>计算结果</h2>
+        <table class="results-table" id="resultsTable">
+            <thead>
+                <tr>
+                    <th>项目</th>
+                    <th>数值</th>
+                    <th>单位</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Results will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="explanation">
+        <h2>计算逻辑说明</h2>
+        <ul>
+            <li><strong>地上建安费</strong> = 地上建筑面积 × 地上单方指标 / 10000（转换为万元）</li>
+            <li><strong>地下建安费</strong> = 地下建筑面积 × 地下单方指标 / 10000（转换为万元）</li>
+            <li><strong>建安费合计</strong> = 地上建安费 + 地下建安费</li>
+            <li><strong>设计费</strong>：根据建安费合计采用差额定率累进方法计算</li>
+            <li><strong>BIM配合费</strong> = (地上建筑面积 + 地下建筑面积) × 11.24 / 10000（转换为万元）</li>
+            <li><strong>监理费</strong>：根据建安费合计采用差额定率累进方法计算</li>
+            <li><strong>造价咨询费</strong>：根据建安费合计采用差额定率累进方法计算</li>
+            <li><strong>勘察费</strong> = 建安费合计 × 1%</li>
+            <li><strong>初设40%+勘察+BIM40%</strong> = 设计费×40% + BIM配合费×40% + 勘察费</li>
+            <li><strong>EPC费</strong> = 设计费×60% + BIM配合费×60% + 建安费合计</li>
+            <li><strong>费用合计</strong> = 建安费合计 + 设计费 + BIM配合费 + 监理费 + 造价咨询费 + 勘察费</li>
+        </ul>
+    </div>
+
+    <!-- Include html2pdf library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        // 设计费计算表（按建安费区间）
+        const designFeeTable = [
+            {max: 200, fee: 9},
+            {max: 500, fee: 20.9},
+            {max: 1000, fee: 38.8},
+            {max: 3000, fee: 103.8},
+            {max: 5000, fee: 163.9},
+            {max: 8000, fee: 249.6},
+            {max: 10000, fee: 304.8},
+            {max: 20000, fee: 566.8},
+            {max: 40000, fee: 1054.0},
+            {max: 60000, fee: 1515.2},
+            {max: 80000, fee: 1960.1},
+            {max: 100000, fee: 2393.4},
+            {max: 200000, fee: 4450.8}
+        ];
+
+        // 监理费计算表（按建安费区间）
+        const supervisionFeeTable = [
+            {max: 500, fee: 16.5},
+            {max: 1000, fee: 30.1},
+            {max: 3000, fee: 78.1},
+            {max: 5000, fee: 120.8},
+            {max: 8000, fee: 181.0},
+            {max: 10000, fee: 218.6},
+            {max: 20000, fee: 393.4},
+            {max: 40000, fee: 708.2},
+            {max: 60000, fee: 991.4},
+            {max: 80000, fee: 1255.8},
+            {max: 100000, fee: 1507.0}
+        ];
+
+        // 造价咨询费率表（施工阶段全过程造价控制）
+        const costConsultingRates = [
+            {max: 100, rate: 0.012},
+            {max: 500, rate: 0.011},
+            {max: 1000, rate: 0.010},
+            {max: 5000, rate: 0.009},
+            {max: 10000, rate: 0.008},
+            {max: Infinity, rate: 0.007}
+        ];
+
+        // 差额定率累进计算方法
+        function calculateProgressiveFee(value, table) {
+            let remaining = value;
+            let totalFee = 0;
+            let lastMax = 0;
+            
+            for (let i = 0; i < table.length; i++) {
+                if (remaining <= 0) break;
+                
+                const range = i === 0 ? table[i].max - 0 : table[i].max - table[i-1].max;
+                const bandFee = i === 0 ? table[i].fee : table[i].fee - table[i-1].fee;
+                const bandRate = bandFee / range;
+                
+                if (value > table[i].max && i < table.length - 1) {
+                    const amount = Math.min(remaining, range);
+                    totalFee += bandRate * amount;
+                    remaining -= amount;
+                } else {
+                    totalFee += bandRate * remaining;
+                    break;
+                }
+                
+                lastMax = table[i].max;
+            }
+            
+            return totalFee;
+        }
+
+        // 差额定率累进计算造价咨询费
+        function calculateCostConsultingFee(value) {
+            let remaining = value;
+            let totalFee = 0;
+            
+            for (let i = 0; i < costConsultingRates.length; i++) {
+                const rate = costConsultingRates[i];
+                if (remaining <= 0) break;
+                
+                if (i === 0) {
+                    if (value <= rate.max) {
+                        totalFee += value * rate.rate;
+                        break;
+                    } else {
+                        totalFee += rate.max * rate.rate;
+                        remaining -= rate.max;
+                    }
+                } else {
+                    const prevMax = costConsultingRates[i-1].max;
+                    const bandMax = rate.max - prevMax;
+                    
+                    if (value > rate.max) {
+                        const bandAmount = Math.min(remaining, bandMax);
+                        totalFee += bandAmount * rate.rate;
+                        remaining -= bandAmount;
+                    } else {
+                        totalFee += remaining * rate.rate;
+                        break;
+                    }
+                }
+            }
+            
+            return totalFee;
+        }
+
+        // 主计算函数
+        function calculateAll() {
+            // 获取用户输入
+            const aboveArea = parseFloat(document.getElementById('aboveArea').value) || 0;
+            const belowArea = parseFloat(document.getElementById('belowArea').value) || 0;
+            const aboveRate = parseFloat(document.getElementById('aboveRate').value) || 0;
+            const belowRate = parseFloat(document.getElementById('belowRate').value) || 0;
+            
+            // 检查有效输入
+            if (aboveArea <= 0 || belowArea <= 0 || aboveRate <= 0 || belowRate <= 0) {
+                alert('请输入有效的建筑面积和单方指标（必须大于0）');
+                return;
+            }
+            
+            // 计算建安费用
+            const aboveCost = aboveArea * aboveRate / 10000;  // 转为万元
+            const belowCost = belowArea * belowRate / 10000;  // 转为万元
+            const totalCost = aboveCost + belowCost;
+            
+            // 计算设计费
+            const designFee = calculateProgressiveFee(totalCost, designFeeTable);
+            
+            // 计算其他费用 - 特别注意：BIM配合费按新公式计算
+            const bimFee = (aboveArea + belowArea) * 11.24 / 10000;  // 按新公式计算
+            const supervisionFee = calculateProgressiveFee(totalCost, supervisionFeeTable);
+            const costConsultingFee = calculateCostConsultingFee(totalCost);
+            const investigationFee = totalCost * 0.01;  // 勘察费 = 建安费合计 × 1%
+            const initialDesignComplex = designFee * 0.4 + bimFee * 0.4 + investigationFee;
+            const epcFee = designFee * 0.6 + bimFee * 0.6 + totalCost;
+            const totalExpense = totalCost + designFee + bimFee + supervisionFee + costConsultingFee + investigationFee;
+            
+            // 创建结果数组
+            const results = [
+                {name: '地上建筑面积', value: aboveArea.toLocaleString(), unit: 'm²', class: ""},
+                {name: '地下建筑面积', value: belowArea.toLocaleString(), unit: 'm²', class: ""},
+                {name: '地上单方指标', value: aboveRate.toLocaleString(), unit: '元/m²', class: ""},
+                {name: '地下单方指标', value: belowRate.toLocaleString(), unit: '元/m²', class: ""},
+                {name: '地上建安费', value: aboveCost.toFixed(2), unit: '万元', class: ""},
+                {name: '地下建安费', value: belowCost.toFixed(2), unit: '万元', class: ""},
+                {name: '建安费合计', value: totalCost.toFixed(2), unit: '万元', class: ""},
+                {name: '设计费', value: designFee.toFixed(4), unit: '万元', class: ""},
+                {name: 'BIM配合费', value: bimFee.toFixed(2), unit: '万元', class: ""},
+                {name: '监理费', value: supervisionFee.toFixed(2), unit: '万元', class: ""},
+                {name: '造价咨询费', value: costConsultingFee.toFixed(2), unit: '万元', class: ""},
+                {name: '勘察费', value: investigationFee.toFixed(2), unit: '万元', class: ""},
+                {name: '初设40%+勘察+BIM40%', value: initialDesignComplex.toFixed(3), unit: '万元', class: "highlight-row"},
+                {name: 'EPC费：施设60%+BIM60%+建安费', value: epcFee.toFixed(4), unit: '万元', class: ""},
+                {name: '费用合计', value: totalExpense.toFixed(4), unit: '万元', class: "summary-row"}
+            ];
+            
+            // 在表格中显示结果
+            const resultsTable = document.getElementById('resultsTable').querySelector('tbody');
+            resultsTable.innerHTML = '';
+            
+            results.forEach(item => {
+                const row = document.createElement('tr');
+                if (item.class) row.classList.add(item.class);
+                
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="result-value">${item.value}</td>
+                    <td>${item.unit}</td>
+                `;
+                
+                resultsTable.appendChild(row);
+            });
+        }
+
+        // 导出为PDF
+        function exportPDF() {
+            const element = document.querySelector('.results-section');
+            const opt = {
+                margin: 10,
+                filename: '工程费用计算结果.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // 导出为Word（伪Word文档）
+        function exportWord() {
+            const tableHTML = document.getElementById('resultsTable').outerHTML;
+            const content = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                      xmlns:w='urn:schemas-microsoft-com:office:word' 
+                      xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset="UTF-8"></head>
+                <body>
+                    <h1>工程费用计算结果</h1>
+                    <h2>计算时间: ${new Date().toLocaleString()}</h2>
+                    ${tableHTML}
+                    <p>导出单位: 广州城市更新投资发展有限公司合约成本部</p>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob(['\uFEFF' + content], { type: 'application/msword' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '工程费用计算结果.doc';
+            link.click();
+        }
+
+        // 导出为Excel
+        function exportExcel() {
+            const table = document.getElementById('resultsTable');
+            const ws = XLSX.utils.table_to_sheet(table);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "工程费用计算结果");
+            
+            // 添加页脚
+            const footerText = `导出单位：广州城市更新投资发展有限公司合约成本部 | 导出时间：${new Date().toLocaleString()}`;
+            XLSX.utils.sheet_add_aoa(ws, [[footerText]], {origin: -1});
+            
+            XLSX.writeFile(wb, "工程费用计算结果.xlsx");
+        }
+
+        // 页面加载时自动计算默认值
+        window.onload = calculateAll;
+    </script>
+</body>
+</html>
